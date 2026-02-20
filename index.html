@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 소중한 기록</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-grad: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --text-color: #222;
+            --card-bg: rgba(255, 255, 255, 0.75);
+        }
+        [data-theme="dark"] {
+            --bg-grad: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            --text-color: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.85);
+        }
+
+        body {
+            background: var(--bg-grad);
+            color: var(--text-color);
+            /* 폰트 1순위: 시스템 산세리프, 2순위: 구글 폰트 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+            letter-spacing: -0.04em;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            transition: 0.5s;
+        }
+
+        .container { width: 100%; max-width: 400px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin: 15px 0 25px 0; }
+        h2 { font-weight: 900; font-size: 1.8rem; margin: 0; }
+
+        .theme-btn { 
+            background: var(--card-bg); border: 1px solid rgba(255,255,255,0.3);
+            width: 44px; height: 44px; border-radius: 14px; cursor: pointer; font-size: 20px;
+            display: flex; justify-content: center; align-items: center; backdrop-filter: blur(10px);
+        }
+
+        textarea {
+            width: 100%; height: 140px; background: var(--card-bg); color: var(--text-color);
+            border: 1px solid rgba(255,255,255,0.3); border-radius: 22px; padding: 20px;
+            box-sizing: border-box; font-size: 16px; font-family: inherit;
+            backdrop-filter: blur(15px); margin-bottom: 12px; outline: none; resize: none;
+        }
+
+        .save-btn { 
+            width: 100%; padding: 18px; border: none; border-radius: 18px;
+            cursor: pointer; font-weight: 700; background: #4f46e5; color: white;
+            font-size: 16px; font-family: inherit; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+        }
+
+        .diary-item {
+            background: var(--card-bg); padding: 22px; border-radius: 25px;
+            margin-top: 20px; position: relative; backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .content-text { line-height: 1.7; font-weight: 500; font-size: 1.05rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>✨ 오늘의 기록</h2>
+            <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+        </div>
+        <textarea id="diaryInput" placeholder="오늘 어떤 일이 있었나요?"></textarea>
+        <button class="save-btn" onclick="saveDiary()">기록 남기기</button>
+        <div id="diaryList"></div>
+    </div>
+
+    <script>
+        // 이모지 선택이나 저장 로직은 기존과 동일하되 폰트 체감은 훨씬 좋아질 거예요!
+        function saveDiary() {
+            var input = document.getElementById('diaryInput');
+            if (!input.value.trim()) return alert("내용을 적어주세요!");
+            var diaries = JSON.parse(localStorage.getItem('myDiaries') || '[]');
+            var newEntry = {
+                id: Date.now(),
+                content: input.value,
+                date: new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })
+            };
+            diaries.unshift(newEntry);
+            localStorage.setItem('myDiaries', JSON.stringify(diaries));
+            input.value = "";
+            loadDiaries();
+        }
+
+        function loadDiaries() {
+            var list = document.getElementById('diaryList');
+            var diaries = JSON.parse(localStorage.getItem('myDiaries') || '[]');
+            list.innerHTML = diaries.map(item => `
+                <div class="diary-item">
+                    <div style="font-size:0.8rem; opacity:0.5; margin-bottom:8px;">${item.date}</div>
+                    <div class="content-text">${item.content}</div>
+                </div>
+            `).join('');
+        }
+        window.onload = loadDiaries;
+        function toggleTheme() {
+            var html = document.documentElement;
+            var btn = document.getElementById('themeBtn');
+            if (html.hasAttribute('data-theme')) {
+                html.removeAttribute('data-theme');
+                btn.innerText = "🌙";
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                btn.innerText = "☀️";
+            }
+        }
+    </script>
+</body>
+</html>
